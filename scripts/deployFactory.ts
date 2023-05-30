@@ -16,14 +16,14 @@ async function main() {
   // We get the contract to deploy
 
   const _feeToSetter = "0x1e3cc205a642Ad3E94746Dd3e232dBc9c40d0395";
-  const MorodexFactory = await ethers.getContractFactory("MorodexFactory");
-  const morodexFactory = await MorodexFactory.deploy(_feeToSetter);
+  const ButanexFactory = await ethers.getContractFactory("ButanexFactory");
+  const butanexFactory = await ButanexFactory.deploy(_feeToSetter);
 
-  await morodexFactory.deployed();
+  await butanexFactory.deployed();
 
-  console.log("MorodexFactory deployed to:", morodexFactory.address);
+  console.log("ButanexFactory deployed to:", butanexFactory.address);
 
-  const pairCodeHash = await morodexFactory.pairCodeHash();
+  const pairCodeHash = await butanexFactory.pairCodeHash();
   console.log("pairCodeHash:", pairCodeHash);
 }
 
