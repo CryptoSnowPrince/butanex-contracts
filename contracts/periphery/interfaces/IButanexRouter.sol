@@ -2,10 +2,10 @@
 pragma solidity >=0.8.17;
 
 // interfaces
-import "../../core/interfaces/IMorodexSwapCallback.sol";
-import "../../core/interfaces/IMorodexMintCallback.sol";
+import "../../core/interfaces/IButanexSwapCallback.sol";
+import "../../core/interfaces/IButanexMintCallback.sol";
 
-interface IMorodexRouter is IMorodexSwapCallback, IMorodexMintCallback {
+interface IButanexRouter is IButanexSwapCallback, IButanexMintCallback {
     /**
      * @notice get the factory address
      * @return address of the factory

@@ -2,21 +2,21 @@
 pragma solidity 0.8.17;
 
 // interfaces
-import "@openzeppelin/contracts/interfaces/IERC20.sol";
-import "../../core/interfaces/IMorodexFactory.sol";
-import "../../core/interfaces/IMorodexSwapCallback.sol";
+import "../../@openzeppelin/contracts/interfaces/IERC20.sol";
+import "../../core/interfaces/IButanexFactory.sol";
+import "../../core/interfaces/IButanexSwapCallback.sol";
 
-interface IAutoSwapper is IMorodexSwapCallback {
+interface IAutoSwapper is IButanexSwapCallback {
     /**
      * @notice public function for executing swaps on tokens and send them to staking contract will be called from a
-     * Morodex Pair on mint and burn, and can be forced call by anyone
-     * @param _token0 token to be converted to mdex
-     * @param _token1 token to be converted to mdex
+     * Butanex Pair on mint and burn, and can be forced call by anyone
+     * @param _token0 token to be converted to bdex
+     * @param _token1 token to be converted to bdex
      */
     function executeWork(IERC20 _token0, IERC20 _token1) external;
 
     /**
-     * @notice transfer MDEX from here to staking contract
+     * @notice transfer BDEX from here to staking contract
      */
     function transferTokens() external;
 
@@ -24,7 +24,7 @@ interface IAutoSwapper is IMorodexSwapCallback {
      * @notice return the factory address
      * @return factory address
      */
-    function factory() external view returns (IMorodexFactory);
+    function factory() external view returns (IButanexFactory);
 
     /**
      * @notice return the staking address
@@ -33,8 +33,8 @@ interface IAutoSwapper is IMorodexSwapCallback {
     function stakingAddress() external view returns (address);
 
     /**
-     * @notice return the morodexToken address
-     * @return morodexToken address
+     * @notice return the butanexToken address
+     * @return butanexToken address
      */
-    function morodexToken() external view returns (IERC20);
+    function butanexToken() external view returns (IERC20);
 }

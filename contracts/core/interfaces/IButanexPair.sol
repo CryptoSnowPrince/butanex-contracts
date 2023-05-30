@@ -2,10 +2,10 @@
 pragma solidity >=0.8.17;
 
 // interfaces
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/extensions/draft-IERC20Permit.sol";
+import "../../@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "../../@openzeppelin/contracts/token/ERC20/extensions/draft-IERC20Permit.sol";
 
-interface IMorodexPair is IERC20, IERC20Permit {
+interface IButanexPair is IERC20, IERC20Permit {
     /**
      * @notice emitted at each mint
      * @param sender address calling the mint function (usualy the Router contract)
@@ -137,7 +137,7 @@ interface IMorodexPair is IERC20, IERC20Permit {
 
     /**
      * @notice Mint lp tokens proportionally of added tokens in balance. Should be called from a contract
-     * that makes safety checks like the MorodexRouter
+     * that makes safety checks like the ButanexRouter
      * @param _to address who will receive minted tokens
      * @param _amount0 amount of token0 to provide
      * @param _amount1 amount of token1 to provide
@@ -153,7 +153,7 @@ interface IMorodexPair is IERC20, IERC20Permit {
     /**
      * @notice Burn lp tokens in the balance of the contract. Sends to the defined address the amount of token0 and
      * token1 proportionally of the amount burned. Should be called from a contract that makes safety checks like the
-     * MorodexRouter
+     * ButanexRouter
      * @param _to address who will receive tokens
      * @return amount0_ amount of token0 sent to the address defined in parameter
      * @return amount1_ amount of token0 sent to the address defined in parameter
@@ -164,7 +164,7 @@ interface IMorodexPair is IERC20, IERC20Permit {
      * @notice Swaps tokens. Sends to the defined address the amount of token0 and token1 defined in parameters.
      * Tokens to trade should be already sent in the contract.
      * Swap function will check if the resulted balance is correct with current reserves and reserves fictive.
-     * Should be called from a contract that makes safety checks like the MorodexRouter
+     * Should be called from a contract that makes safety checks like the ButanexRouter
      * @param _to address who will receive tokens
      * @param _zeroForOne token0 to token1
      * @param _amountSpecified amount of token wanted

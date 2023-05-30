@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 pragma solidity >=0.8.17;
 
-interface IMorodexFactory {
+interface IButanexFactory {
     /**
-     * @notice emitted at each MorodexPair created
+     * @notice emitted at each ButanexPair created
      * @param token0 address of the token0
      * @param token1 address of the token1
-     * @param pair address of the MorodexPair created
-     * @param totalPair number of MorodexPair created so far
+     * @param pair address of the ButanexPair created
+     * @param totalPair number of ButanexPair created so far
      */
     event PairCreated(address indexed token0, address indexed token1, address pair, uint256 totalPair);
 

@@ -2,12 +2,12 @@
 pragma solidity =0.8.17;
 
 // libraries
-import "@openzeppelin/contracts/utils/math/Math.sol";
+import "../../@openzeppelin/contracts/utils/math/Math.sol";
 
 // interfaces
-import "../interfaces/IMorodexPair.sol";
+import "../interfaces/IButanexPair.sol";
 
-library MorodexLibrary {
+library ButanexLibrary {
     /// @notice amount of fees sent to LP, not in percent but in FEES_BASE
     uint256 public constant FEES_LP = 5;
 
@@ -77,7 +77,7 @@ library MorodexLibrary {
         uint256 _priceAverageOut,
         uint256 _currentTimestamp
     ) internal pure returns (uint256 newPriceAverageIn_, uint256 newPriceAverageOut_) {
-        require(_currentTimestamp >= _priceAverageLastTimestamp, "MorodexPair: INVALID_TIMESTAMP");
+        require(_currentTimestamp >= _priceAverageLastTimestamp, "ButanexPair: INVALID_TIMESTAMP");
 
         // very first time
         if (_priceAverageLastTimestamp == 0) {
@@ -340,10 +340,10 @@ library MorodexLibrary {
             uint256 newFictiveReserveOut_
         )
     {
-        require(_amountIn > 0, "MoroDexLibrary: INSUFFICIENT_INPUT_AMOUNT");
+        require(_amountIn > 0, "ButanexLibrary: INSUFFICIENT_INPUT_AMOUNT");
         require(
             _reserveIn > 0 && _reserveOut > 0 && _fictiveReserveIn > 0 && _fictiveReserveOut > 0,
-            "MoroDexLibrary: INSUFFICIENT_LIQUIDITY"
+            "ButanexLibrary: INSUFFICIENT_LIQUIDITY"
         );
 
         uint256 _amountInWithFees = (_amountIn * REVERSE_FEES_TOTAL) / FEES_BASE;
@@ -451,14 +451,14 @@ library MorodexLibrary {
             uint256 newFictiveReserveOut_
         )
     {
-        require(_amountOut > 0, "MoroDexLibrary: INSUFFICIENT_OUTPUT_AMOUNT");
+        require(_amountOut > 0, "ButanexLibrary: INSUFFICIENT_OUTPUT_AMOUNT");
         require(
             _amountOut < _fictiveReserveOut &&
                 _reserveIn > 0 &&
                 _reserveOut > 0 &&
                 _fictiveReserveIn > 0 &&
                 _fictiveReserveOut > 0,
-            "MoroDexLibrary: INSUFFICIENT_LIQUIDITY"
+            "ButanexLibrary: INSUFFICIENT_LIQUIDITY"
         );
 
         uint256 _firstAmountOut = computeFirstTradeQtyOut(

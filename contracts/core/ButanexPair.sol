@@ -2,24 +2,24 @@
 pragma solidity =0.8.17;
 
 // contracts
-import "@openzeppelin/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
+import "../@openzeppelin/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
 
 // libraries
-import "@openzeppelin/contracts/utils/math/SafeCast.sol";
-import "./libraries/MorodexLibrary.sol";
+import "../@openzeppelin/contracts/utils/math/SafeCast.sol";
+import "./libraries/ButanexLibrary.sol";
 import "./libraries/TransferHelper.sol";
 
 // interfaces
-import "./interfaces/IMorodexPair.sol";
-import "./interfaces/IMorodexFactory.sol";
-import "./interfaces/IMorodexSwapCallback.sol";
-import "./interfaces/IMorodexMintCallback.sol";
+import "./interfaces/IButanexPair.sol";
+import "./interfaces/IButanexFactory.sol";
+import "./interfaces/IButanexSwapCallback.sol";
+import "./interfaces/IButanexMintCallback.sol";
 
 /**
- * @title MorodexPair
+ * @title ButanexPair
  * @notice Pair contract that allows user to swap 2 ERC20-strict tokens in a decentralised and automated way
  */
-contract MorodexPair is IMorodexPair, ERC20Permit {
+contract ButanexPair is IButanexPair, ERC20Permit {
     using SafeCast for uint256;
     using SafeCast for int256;
 
@@ -56,7 +56,7 @@ contract MorodexPair is IMorodexPair, ERC20Permit {
     address public token0;
     address public token1;
 
-    // morodex new fictive reserves
+    // butanex new fictive reserves
     uint128 internal fictiveReserve0;
     uint128 internal fictiveReserve1; // accessible via getFictiveReserves()
 
@@ -73,42 +73,42 @@ contract MorodexPair is IMorodexPair, ERC20Permit {
     uint8 private lockStatus = CONTRACT_UNLOCKED;
 
     modifier lock() {
-        require(lockStatus == CONTRACT_UNLOCKED, "MoroDex: LOCKED");
+        require(lockStatus == CONTRACT_UNLOCKED, "Butanex: LOCKED");
         lockStatus = CONTRACT_LOCKED;
         _;
         lockStatus = CONTRACT_UNLOCKED;
     }
 
-    constructor() ERC20("MoroDex LP-Token", "MDEX-LP") ERC20Permit("MoroDex LP-Token") {
+    constructor() ERC20("Butanex LP-Token", "BDEX-LP") ERC20Permit("Butanex LP-Token") {
         factory = msg.sender;
     }
 
-    ///@inheritdoc IMorodexPair
+    ///@inheritdoc IButanexPair
     function initialize(address _token0, address _token1) external override {
-        require(msg.sender == factory, "MoroDex: FORBIDDEN"); // sufficient check
+        require(msg.sender == factory, "Butanex: FORBIDDEN"); // sufficient check
         token0 = _token0;
         token1 = _token1;
     }
 
-    ///@inheritdoc IMorodexPair
+    ///@inheritdoc IButanexPair
     function getReserves() external view override returns (uint256 reserve0_, uint256 reserve1_) {
         reserve0_ = IERC20(token0).balanceOf(address(this)) - feeToAmount0;
         reserve1_ = IERC20(token1).balanceOf(address(this)) - feeToAmount1;
     }
 
-    ///@inheritdoc IMorodexPair
+    ///@inheritdoc IButanexPair
     function getFictiveReserves() external view override returns (uint256 fictiveReserve0_, uint256 fictiveReserve1_) {
         fictiveReserve0_ = fictiveReserve0;
         fictiveReserve1_ = fictiveReserve1;
     }
 
-    ///@inheritdoc IMorodexPair
+    ///@inheritdoc IButanexPair
     function getFees() external view override returns (uint256 fees0_, uint256 fees1_) {
         fees0_ = feeToAmount0;
         fees1_ = feeToAmount1;
     }
 
-    ///@inheritdoc IMorodexPair
+    ///@inheritdoc IButanexPair
     function getPriceAverage()
         external
         view
@@ -119,7 +119,7 @@ contract MorodexPair is IMorodexPair, ERC20Permit {
         priceAverageLastTimestamp_ = priceAverageLastTimestamp;
     }
 
-    ///@inheritdoc IMorodexPair
+    ///@inheritdoc IButanexPair
     function getUpdatedPriceAverage(
         uint256 _fictiveReserveIn,
         uint256 _fictiveReserveOut,
@@ -128,7 +128,7 @@ contract MorodexPair is IMorodexPair, ERC20Permit {
         uint256 _priceAverageOut,
         uint256 _currentTimestamp
     ) public pure returns (uint256 priceAverageIn_, uint256 priceAverageOut_) {
-        (priceAverageIn_, priceAverageOut_) = MorodexLibrary.getUpdatedPriceAverage(
+        (priceAverageIn_, priceAverageOut_) = ButanexLibrary.getUpdatedPriceAverage(
             _fictiveReserveIn,
             _fictiveReserveOut,
             _priceAverageLastTimestamp,
@@ -138,7 +138,7 @@ contract MorodexPair is IMorodexPair, ERC20Permit {
         );
     }
 
-    ///@inheritdoc IMorodexPair
+    ///@inheritdoc IButanexPair
     function mint(
         address _to,
         uint256 _amount0,
@@ -151,7 +151,7 @@ contract MorodexPair is IMorodexPair, ERC20Permit {
         _feeToSwap();
     }
 
-    ///@inheritdoc IMorodexPair
+    ///@inheritdoc IButanexPair
     function burn(address _to) external override returns (uint256 amount0_, uint256 amount1_) {
         (amount0_, amount1_) = _burnBeforeFee(_to);
 
@@ -159,14 +159,14 @@ contract MorodexPair is IMorodexPair, ERC20Permit {
         _feeToSwap();
     }
 
-    ///@inheritdoc IMorodexPair
+    ///@inheritdoc IButanexPair
     function swap(
         address _to,
         bool _zeroForOne,
         int256 _amountSpecified,
         bytes calldata _data
     ) external override lock returns (int256 amount0_, int256 amount1_) {
-        require(_amountSpecified != 0, "MoroDex: ZERO_AMOUNT");
+        require(_amountSpecified != 0, "Butanex: ZERO_AMOUNT");
 
         SwapParams memory _params = SwapParams({
             amountCalculated: 0,
@@ -206,7 +206,7 @@ contract MorodexPair is IMorodexPair, ERC20Permit {
             );
 
         // compute new price average
-        (_params.priceAverageIn, _params.priceAverageOut) = MorodexLibrary.getUpdatedPriceAverage(
+        (_params.priceAverageIn, _params.priceAverageOut) = ButanexLibrary.getUpdatedPriceAverage(
             _params.fictiveReserveIn,
             _params.fictiveReserveOut,
             priceAverageLastTimestamp,
@@ -222,7 +222,7 @@ contract MorodexPair is IMorodexPair, ERC20Permit {
 
         if (_amountSpecified > 0) {
             uint256 _temp;
-            (_temp, , , _params.fictiveReserveIn, _params.fictiveReserveOut) = MorodexLibrary.getAmountOut(
+            (_temp, , , _params.fictiveReserveIn, _params.fictiveReserveOut) = ButanexLibrary.getAmountOut(
                 _amountSpecified.toUint256(),
                 _params.balanceIn,
                 _params.balanceOut,
@@ -234,7 +234,7 @@ contract MorodexPair is IMorodexPair, ERC20Permit {
             _params.amountCalculated = _temp.toInt256();
         } else {
             uint256 _temp;
-            (_temp, , , _params.fictiveReserveIn, _params.fictiveReserveOut) = MorodexLibrary.getAmountIn(
+            (_temp, , , _params.fictiveReserveIn, _params.fictiveReserveOut) = ButanexLibrary.getAmountIn(
                 (-_amountSpecified).toUint256(),
                 _params.balanceIn,
                 _params.balanceOut,
@@ -258,38 +258,38 @@ contract MorodexPair is IMorodexPair, ERC20Permit {
                     : (_amountSpecified, _params.amountCalculated)
             );
 
-        require(_to != _params.token0 && _to != _params.token1, "MoroDex: INVALID_TO");
+        require(_to != _params.token0 && _to != _params.token1, "Butanex: INVALID_TO");
         if (_zeroForOne) {
             if (amount1_ < 0) {
                 TransferHelper.safeTransfer(_params.token1, _to, uint256(-amount1_));
             }
-            IMorodexSwapCallback(msg.sender).morodexSwapCallback(amount0_, amount1_, _data);
+            IButanexSwapCallback(msg.sender).butanexSwapCallback(amount0_, amount1_, _data);
             uint256 _balanceInBefore = _params.balanceIn;
             _params.balanceIn = IERC20(token0).balanceOf(address(this));
             require(
                 _balanceInBefore + feeToAmount0 + (amount0_).toUint256() <= _params.balanceIn,
-                "MoroDex: INSUFFICIENT_TOKEN0_INPUT_AMOUNT"
+                "Butanex: INSUFFICIENT_TOKEN0_INPUT_AMOUNT"
             );
             _params.balanceOut = IERC20(token1).balanceOf(address(this));
         } else {
             if (amount0_ < 0) {
                 TransferHelper.safeTransfer(_params.token0, _to, uint256(-amount0_));
             }
-            IMorodexSwapCallback(msg.sender).morodexSwapCallback(amount0_, amount1_, _data);
+            IButanexSwapCallback(msg.sender).butanexSwapCallback(amount0_, amount1_, _data);
             uint256 _balanceInBefore = _params.balanceIn;
             _params.balanceIn = IERC20(token1).balanceOf(address(this));
             require(
                 _balanceInBefore + feeToAmount1 + (amount1_).toUint256() <= _params.balanceIn,
-                "MoroDex: INSUFFICIENT_TOKEN1_INPUT_AMOUNT"
+                "Butanex: INSUFFICIENT_TOKEN1_INPUT_AMOUNT"
             );
             _params.balanceOut = IERC20(token0).balanceOf(address(this));
         }
 
         // update feeTopart
-        bool _feeOn = IMorodexFactory(factory).feeTo() != address(0);
+        bool _feeOn = IButanexFactory(factory).feeTo() != address(0);
         if (_zeroForOne) {
             if (_feeOn) {
-                feeToAmount0 += ((uint256(amount0_) * MorodexLibrary.FEES_POOL) / MorodexLibrary.FEES_BASE).toUint104();
+                feeToAmount0 += ((uint256(amount0_) * ButanexLibrary.FEES_POOL) / ButanexLibrary.FEES_BASE).toUint104();
             }
             _update(
                 _params.balanceIn,
@@ -301,7 +301,7 @@ contract MorodexPair is IMorodexPair, ERC20Permit {
             );
         } else {
             if (_feeOn) {
-                feeToAmount1 += ((uint256(amount1_) * MorodexLibrary.FEES_POOL) / MorodexLibrary.FEES_BASE).toUint104();
+                feeToAmount1 += ((uint256(amount1_) * ButanexLibrary.FEES_POOL) / ButanexLibrary.FEES_BASE).toUint104();
             }
             _update(
                 _params.balanceOut,
@@ -333,8 +333,8 @@ contract MorodexPair is IMorodexPair, ERC20Permit {
         uint256 _priceAverage0,
         uint256 _priceAverage1
     ) private {
-        require(_fictiveReserve0 > 0 && _fictiveReserve1 > 0, "MoroDex: FICTIVE_RESERVES_TOO_LOW");
-        require(_fictiveReserve0 <= type(uint128).max && _fictiveReserve1 <= type(uint128).max, "MoroDex: OVERFLOW");
+        require(_fictiveReserve0 > 0 && _fictiveReserve1 > 0, "Butanex: FICTIVE_RESERVES_TOO_LOW");
+        require(_fictiveReserve0 <= type(uint128).max && _fictiveReserve1 <= type(uint128).max, "Butanex: OVERFLOW");
         fictiveReserve0 = uint128(_fictiveReserve0);
         fictiveReserve1 = uint128(_fictiveReserve1);
 
@@ -353,7 +353,7 @@ contract MorodexPair is IMorodexPair, ERC20Permit {
      * @return feeOn_ if part of the fees goes to feeTo
      */
     function _mintFee() private returns (bool feeOn_) {
-        address _feeTo = IMorodexFactory(factory).feeTo();
+        address _feeTo = IButanexFactory(factory).feeTo();
         feeOn_ = _feeTo != address(0);
         if (feeOn_) {
             // gas saving
@@ -398,8 +398,8 @@ contract MorodexPair is IMorodexPair, ERC20Permit {
         uint256 _balance1 = IERC20(token1).balanceOf(address(this));
         uint256 _totalSupply = totalSupply();
 
-        IMorodexMintCallback(msg.sender).morodexMintCallback(
-            IMorodexMintCallback.MintCallbackData({
+        IButanexMintCallback(msg.sender).butanexMintCallback(
+            IButanexMintCallback.MintCallbackData({
                 token0: token0,
                 token1: token1,
                 amount0: _amount0,
@@ -412,8 +412,8 @@ contract MorodexPair is IMorodexPair, ERC20Permit {
         uint256 _balance0after = IERC20(token0).balanceOf(address(this));
         uint256 _balance1after = IERC20(token1).balanceOf(address(this));
 
-        require(_balance0after >= _balance0 + _amount0, "MoroDex: INSUFFICIENT_AMOUNT_0");
-        require(_balance1after >= _balance1 + _amount1, "MoroDex: INSUFFICIENT_AMOUNT_1");
+        require(_balance0after >= _balance0 + _amount0, "Butanex: INSUFFICIENT_AMOUNT_0");
+        require(_balance1after >= _balance1 + _amount1, "Butanex: INSUFFICIENT_AMOUNT_1");
 
         if (_totalSupply == 0) {
             liquidity_ = Math.sqrt(_amount0 * _amount1) - MINIMUM_LIQUIDITY;
@@ -428,7 +428,7 @@ contract MorodexPair is IMorodexPair, ERC20Permit {
             _fictiveReserve1 = (fictiveReserve1 * (_totalSupply + liquidity_)) / _totalSupply;
         }
 
-        require(liquidity_ > 0, "MoroDex: INSUFFICIENT_LIQUIDITY_MINTED");
+        require(liquidity_ > 0, "Butanex: INSUFFICIENT_LIQUIDITY_MINTED");
         _mint(_to, liquidity_);
 
         _update(_balance0after, _balance1after, _fictiveReserve0, _fictiveReserve1, priceAverage0, priceAverage1);
@@ -457,7 +457,7 @@ contract MorodexPair is IMorodexPair, ERC20Permit {
         // pro-rata distribution
         amount0_ = (_liquidity * _balance0) / _totalSupply;
         amount1_ = (_liquidity * _balance1) / _totalSupply;
-        require(amount0_ > 0 && amount1_ > 0, "MoroDex: INSUFFICIENT_LIQUIDITY_BURNED");
+        require(amount0_ > 0 && amount1_ > 0, "Butanex: INSUFFICIENT_LIQUIDITY_BURNED");
 
         // update proportionally the fictiveReserves
         uint256 _fictiveReserve0 = fictiveReserve0;
@@ -481,7 +481,7 @@ contract MorodexPair is IMorodexPair, ERC20Permit {
      * @notice execute function "executeWork(address,address)" of the feeTo contract. Doesn't revert tx if it reverts
      */
     function _feeToSwap() internal {
-        address _feeTo = IMorodexFactory(factory).feeTo();
+        address _feeTo = IButanexFactory(factory).feeTo();
 
         // call contract destination for handling fees
         // We don't handle return values so it does not revert for LP if something went wrong in feeTo

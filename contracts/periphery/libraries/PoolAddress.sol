@@ -2,11 +2,11 @@
 pragma solidity =0.8.17;
 
 // libraries
-import "../../core/libraries/MorodexLibrary.sol";
+import "../../core/libraries/ButanexLibrary.sol";
 
 // interfaces
-import "../../core/interfaces/IMorodexFactory.sol";
-import "../../core/interfaces/IMorodexPair.sol";
+import "../../core/interfaces/IButanexFactory.sol";
+import "../../core/interfaces/IButanexPair.sol";
 
 library PoolHelpers {
     /**
@@ -17,9 +17,9 @@ library PoolHelpers {
      * @return token1_ token1 sorted
      */
     function sortTokens(address _tokenA, address _tokenB) internal pure returns (address token0_, address token1_) {
-        require(_tokenA != _tokenB, "MorodexHelper: IDENTICAL_ADDRESSES");
+        require(_tokenA != _tokenB, "ButanexHelper: IDENTICAL_ADDRESSES");
         (token0_, token1_) = _tokenA < _tokenB ? (_tokenA, _tokenB) : (_tokenB, _tokenA);
-        require(token0_ != address(0), "MorodexHelper: ZERO_ADDRESS");
+        require(token0_ != address(0), "ButanexHelper: ZERO_ADDRESS");
     }
 
     /**
@@ -36,7 +36,7 @@ library PoolHelpers {
         address _tokenB
     ) internal view returns (uint256 reserveA_, uint256 reserveB_) {
         (address _token0, ) = sortTokens(_tokenA, _tokenB);
-        (uint256 _reserve0, uint256 _reserve1) = IMorodexPair(PoolAddress.pairFor(_factory, _tokenA, _tokenB))
+        (uint256 _reserve0, uint256 _reserve1) = IButanexPair(PoolAddress.pairFor(_factory, _tokenA, _tokenB))
             .getReserves();
         (reserveA_, reserveB_) = _tokenA == _token0 ? (_reserve0, _reserve1) : (_reserve1, _reserve0);
     }
@@ -55,7 +55,7 @@ library PoolHelpers {
         address _tokenB
     ) internal view returns (uint256 fictiveReserveA_, uint256 fictiveReserveB_) {
         (address _token0, ) = sortTokens(_tokenA, _tokenB);
-        (uint256 _fictiveReserve0, uint256 _fictiveReserve1) = IMorodexPair(
+        (uint256 _fictiveReserve0, uint256 _fictiveReserve1) = IButanexPair(
             PoolAddress.pairFor(_factory, _tokenA, _tokenB)
         ).getFictiveReserves();
         (fictiveReserveA_, fictiveReserveB_) = _tokenA == _token0
@@ -77,7 +77,7 @@ library PoolHelpers {
         address _tokenB
     ) internal view returns (uint256 priceAverageA_, uint256 priceAverageB_) {
         (address _token0, ) = sortTokens(_tokenA, _tokenB);
-        (uint256 _priceAverage0, uint256 _priceAverage1, ) = IMorodexPair(
+        (uint256 _priceAverage0, uint256 _priceAverage1, ) = IButanexPair(
             PoolAddress.pairFor(_factory, _tokenA, _tokenB)
         ).getPriceAverage();
         (priceAverageA_, priceAverageB_) = _tokenA == _token0
@@ -93,8 +93,8 @@ library PoolHelpers {
      * @return amountB_ equivalent amount of asset B
      */
     function quote(uint256 _amountA, uint256 _reserveA, uint256 _reserveB) internal pure returns (uint256 amountB_) {
-        require(_amountA > 0, "MorodexHelper: INSUFFICIENT_AMOUNT");
-        require(_reserveA > 0 && _reserveB > 0, "MorodexHelper: INSUFFICIENT_LIQUIDITY");
+        require(_amountA > 0, "ButanexHelper: INSUFFICIENT_AMOUNT");
+        require(_reserveA > 0 && _reserveB > 0, "ButanexHelper: INSUFFICIENT_LIQUIDITY");
         amountB_ = (_amountA * _reserveB) / _reserveA;
     }
 }
@@ -102,10 +102,10 @@ library PoolHelpers {
 library PoolAddress {
     /**
      * @notice Deterministically computes the pool address given the factory and PoolKey
-     * @param _factory The MoroDex factory contract address
+     * @param _factory The Butanex factory contract address
      * @param _tokenA The first token of the pool
      * @param _tokenB The second token of the pool
-     * @return pair_ The contract address of the MorodexPair
+     * @return pair_ The contract address of the ButanexPair
      */
     function pairFor(address _factory, address _tokenA, address _tokenB) internal pure returns (address pair_) {
         (address token0, address token1) = PoolHelpers.sortTokens(_tokenA, _tokenB);
@@ -127,16 +127,16 @@ library PoolAddress {
 
     /**
      * @notice make a call to the factory to determine the pair address. usefull for coverage test
-     * @param _factory The MoroDex factory contract address
+     * @param _factory The Butanex factory contract address
      * @param _tokenA The first token of the pool
      * @param _tokenB The second token of the pool
-     * @return pair_ The contract address of the MorodexPair
+     * @return pair_ The contract address of the ButanexPair
      */
     function pairForByStorage(
         address _factory,
         address _tokenA,
         address _tokenB
     ) internal view returns (address pair_) {
-        return IMorodexFactory(_factory).getPair(_tokenA, _tokenB);
+        return IButanexFactory(_factory).getPair(_tokenA, _tokenB);
     }
 }
