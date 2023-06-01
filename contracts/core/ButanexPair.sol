@@ -79,7 +79,7 @@ contract ButanexPair is IButanexPair, ERC20Permit {
         lockStatus = CONTRACT_UNLOCKED;
     }
 
-    constructor() ERC20("Butanex LP-Token", "BDEX-LP") ERC20Permit("Butanex LP-Token") {
+    constructor() ERC20("Butanex LP-Token", "BEX-LP") ERC20Permit("Butanex LP-Token") {
         factory = msg.sender;
     }
 

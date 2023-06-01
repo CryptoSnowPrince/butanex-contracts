@@ -4,7 +4,7 @@ pragma solidity 0.8.17;
 import "../@openzeppelin/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
 
 /**
- * @title BUTANEX (BDEX), ERC-20 token, 18, 1,000,000,000
+ * @title BUTANEX (BEX), ERC-20 token, 18, 1,000,000,000
  * @notice Inherit from the ERC20Permit, allowing to sign approve off chain
  */
 contract Butanex is ERC20Permit {

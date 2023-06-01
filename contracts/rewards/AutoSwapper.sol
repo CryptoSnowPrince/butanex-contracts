@@ -89,8 +89,8 @@ contract AutoSwapper is IAutoSwapper {
     }
 
     /**
-     * @notice private function to swap token in BDEX and send it to the staking address
-     * @param _token address of the token to swap into bdex
+     * @notice private function to swap token in BEX and send it to the staking address
+     * @param _token address of the token to swap into bex
      */
     function _swapAndSend(IERC20 _token) private {
         if (_token == butanexToken) return;

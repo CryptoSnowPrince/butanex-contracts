@@ -10,13 +10,13 @@ interface IAutoSwapper is IButanexSwapCallback {
     /**
      * @notice public function for executing swaps on tokens and send them to staking contract will be called from a
      * Butanex Pair on mint and burn, and can be forced call by anyone
-     * @param _token0 token to be converted to bdex
-     * @param _token1 token to be converted to bdex
+     * @param _token0 token to be converted to bex
+     * @param _token1 token to be converted to bex
      */
     function executeWork(IERC20 _token0, IERC20 _token1) external;
 
     /**
-     * @notice transfer BDEX from here to staking contract
+     * @notice transfer BEX from here to staking contract
      */
     function transferTokens() external;
 
