@@ -15,7 +15,8 @@ ButanexFactory(0.8.17 optimization: 200): 0x5e1100ea18F918a4e9AB70694c6c554e1E94
 WBBC(0.4.18 optimization: 200): 0x38AcAA98Db174cEE218A33635322C19cC1155d20
                                 0x38acaa98db174cee218a33635322c19cc1155d20
 
-ButanexRouter(0.8.17 optimization: 200): 0xEe8d287B844959ADe40d718Dc23077ba920e2f07
+Replace InitPairCodeHash on PoolAddress.sol
+ButanexRouter(0.8.17 optimization: 200): 0xC8ab3763b3b19DaEbDB96bC3714cE2428BC7cb1D
     FACTORY: 0x5e1100ea18F918a4e9AB70694c6c554e1E940D32
     WETH: 0x38AcAA98Db174cEE218A33635322C19cC1155d20
 
